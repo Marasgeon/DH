@@ -4,7 +4,7 @@
 
 <h1>The Denavit–Hartenberg Convention</h1>
 
-<p><em>Wherein a manipulator is reduced to four numbers per joint, those numbers to four elementary motions, and the motions to a single chain of matrix products — with a working model the reader may turn.</em></p>
+<p><em>Wherein a manipulator is reduced to four numbers per joint, those numbers to four elementary motions, and the motions to a single chain of matrix products, with a working model the reader may turn.</em></p>
 
 <p><sub>A PRACTICAL TREATISE FOR STUDENTS OF MACHINES</sub></p>
 
@@ -15,21 +15,21 @@
 An interactive treatise on the Denavit–Hartenberg method for two- and three-link manipulators. The whole work is a single HTML file: open it, turn the joints, edit the table, and watch the matrices and the drawing follow.
 
 <p align="center">
-  <img src="docs/plate.jpg" alt="Plate I — the chain of frames, drawn from the parameter table" width="820">
+  <img src="docs/plate.jpg" alt="Plate I: the chain of frames, drawn from the parameter table" width="820">
 </p>
 
-<p align="center"><sub><em>Plate I — the chain of frames, drawn live from the table beneath it.</em></sub></p>
+<p align="center"><sub><em>Plate I: the chain of frames, drawn live from the table beneath it.</em></sub></p>
 
 ---
 
 ## Contents
 
-- **I. The Mechanism** — an orbitable plate with a coordinate frame at every joint, view controls, and a live readout of the tool position.
-- **II. The Table of Parameters** — edit θ, d, a, and α for each joint; mark a joint revolute or prismatic; load a preset and restore it.
-- **III. Four Motions, One Matrix** — the four elementary transformations for a selected joint, multiplied in order to compose its link matrix.
-- **IV. The Chain of Transformations** — the cumulative products, the tool frame's axes and origin, and the orientation angles.
-- **V. A Check by Hand** — for planar chains, the closed-form trigonometry set beside the matrix product.
-- **VI. Notes on the Convention** — the standard (distal) convention, reading a homogeneous matrix, and exercises for the student.
+- **I. The Mechanism.** An orbitable plate with a coordinate frame at every joint, view controls, and a live readout of the tool position.
+- **II. The Table of Parameters.** Edit θ, d, a, and α for each joint, mark a joint revolute or prismatic, and load or restore a preset.
+- **III. Four Motions, One Matrix.** The four elementary transformations for a selected joint, multiplied in order to compose its link matrix.
+- **IV. The Chain of Transformations.** The cumulative products, the tool frame's axes and origin, and the orientation angles.
+- **V. A Check by Hand.** For planar chains, the closed-form trigonometry set beside the matrix product.
+- **VI. Notes on the Convention.** The standard (distal) convention, reading a homogeneous matrix, and exercises for the student.
 
 ## To turn the pages
 
@@ -70,10 +70,10 @@ whose columns are the tool axes and whose last column is its position.
 
 ## Colophon
 
-Set in EB Garamond, IM Fell English, and Courier Prime, with serif and monospace fallbacks for offline reading. The plate is drawn as SVG; the arithmetic is plain JavaScript; the page keeps no dependencies beyond its web fonts. Prepared for students of machines.
+Set in EB Garamond, IM Fell English, and Courier Prime, with serif and monospace fallbacks for offline reading. The plate is drawn as SVG, the arithmetic is plain JavaScript, and the page keeps no dependencies beyond its web fonts. Prepared for students of machines.
 
 ### Reference
 
-> J. Denavit and R. S. Hartenberg, “A kinematic notation for lower-pair mechanisms based on matrices,” *Journal of Applied Mechanics*, 22(2):215–221, 1955.
+> J. Denavit and R. S. Hartenberg, “A kinematic notation for lower-pair mechanisms based on matrices,” *Journal of Applied Mechanics*, 22(2):215 to 221, 1955.
 
 <div align="center"><sub>❦</sub></div>
