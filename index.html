@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Denavit–Hartenberg Convention — An Interactive Treatise</title>
+<meta name="description" content="An interactive, illustrated primer on the Denavit–Hartenberg method for serial manipulators: four parameters, four elementary matrices, one chain of products.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=IM+Fell+English:ital@0;1&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6ecd5;
+  --paper-2:#efe2c4;
+  --paper-3:#e6d4b1;
+  --ink:#392c1d;
+  --ink-soft:#6d5a43;
+  --ink-faint:#9c8768;
+  --rule:#c0a87f;
+  --rule-soft:#d9c7a3;
+  --ox:#8c3a2b;
+  --ochre:#a37a2c;
+  --teal:#3f685c;
+  --blue:#3d5573;
+  --serif:'EB Garamond', Georgia, 'Times New Roman', serif;
+  --display:'IM Fell English', 'EB Garamond', Georgia, serif;
+  --mono:'Courier Prime', 'Courier New', monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:18.5px;
+  line-height:1.64;
+  background:
+    radial-gradient(ellipse at 12% 0%, #f2e4c8 0%, rgba(242,228,200,0) 58%),
+    radial-gradient(ellipse at 88% 100%, #e6d3ae 0%, rgba(230,211,174,0) 55%),
+    #e2d0ab;
+  background-attachment:fixed;
+}
+body::before{
+  content:"";
+  position:fixed; inset:0; z-index:4; pointer-events:none;
+  background-image:
+    repeating-linear-gradient(91deg, rgba(122,92,52,.035) 0 1px, rgba(0,0,0,0) 1px 4px),
+    repeating-linear-gradient(1.5deg, rgba(122,92,52,.022) 0 1px, rgba(0,0,0,0) 1px 6px);
+  mix-blend-mode:multiply;
+}
+.grain{position:fixed; inset:0; width:100%; height:100%; z-index:5; pointer-events:none; opacity:.045; mix-blend-mode:multiply}
+::selection{background:rgba(140,58,43,.18); color:var(--ink)}
+
+.book{
+  position:relative; z-index:1;
+  max-width:1140px;
+  margin:30px auto 64px;
+  padding:40px 62px 54px;
+  background-color:var(--paper);
+  background-image:
+    radial-gradient(ellipse at 20% 3%, rgba(255,251,241,.9), rgba(255,251,241,0) 46%),
+    radial-gradient(circle at 91% 9%, rgba(160,118,58,.10) 0 2px, rgba(0,0,0,0) 3px),
+    radial-gradient(circle at 6% 22%, rgba(150,110,50,.09) 0 1.6px, rgba(0,0,0,0) 2.6px),
+    radial-gradient(ellipse at 96% 44%, rgba(150,110,50,.055), rgba(0,0,0,0) 14%),
+    radial-gradient(circle at 14% 63%, rgba(150,110,50,.07) 0 2.4px, rgba(0,0,0,0) 3.4px),
+    radial-gradient(circle at 84% 81%, rgba(150,110,50,.06) 0 1.8px, rgba(0,0,0,0) 2.8px);
+  border:1px solid #c8b087;
+  box-shadow:
+    0 1px 0 rgba(255,252,243,.7) inset,
+    0 0 60px rgba(130,95,50,.10) inset,
+    0 26px 60px -26px rgba(60,42,20,.55),
+    0 3px 0 #d6c09a;
+}
+.book::before{
+  content:""; position:absolute; inset:13px; border:1px solid rgba(142,111,70,.32); pointer-events:none;
+}
+.book::after{
+  content:""; position:absolute; inset:17px; border:1px solid rgba(142,111,70,.13); pointer-events:none;
+}
+
+/* ---------- masthead ---------- */
+.running-head{
+  display:flex; justify-content:space-between; align-items:baseline; gap:20px;
+  font-size:10.5px; letter-spacing:.26em; text-transform:uppercase; color:var(--ink-soft);
+  border-bottom:1px solid var(--rule); padding-bottom:9px;
+}
+.kicker{
+  margin:30px 0 16px; text-align:center;
+  font-size:11px; letter-spacing:.44em; text-transform:uppercase; color:var(--ochre);
+}
+h1{
+  margin:0 auto; max-width:900px; text-align:center;
+  font-family:var(--display); font-weight:400;
+  font-size:clamp(38px,5.6vw,66px); line-height:1.03; letter-spacing:.2px;
+  color:#33261a;
+}
+h1 .tname{font-style:italic; color:#412f1f}
+.subtitle{
+  max-width:640px; margin:20px auto 0; text-align:center;
+  font-style:italic; font-size:19px; line-height:1.55; color:var(--ink-soft);
+}
+.fleuron{
+  display:flex; align-items:center; justify-content:center; gap:16px;
+  margin:24px auto 26px; color:var(--ochre); font-size:16px;
+}
+.fleuron::before,.fleuron::after{content:""; height:1px; width:min(150px,18vw); background:var(--rule); display:block}
+.intro{margin:0 auto; max-width:760px; font-size:18.5px; text-align:justify; hyphens:auto}
+.intro::first-letter{
+  float:left; font-family:var(--display); font-size:72px; line-height:.76;
+  padding:8px 10px 0 0; color:var(--ox);
+}
+.intro .lead{font-variant:small-caps; letter-spacing:.05em}
+.marginal{
+  float:right; clear:right; width:192px; margin:6px -14px 14px 30px;
+  font-size:14px; line-height:1.5; color:var(--ink-soft);
+  border-top:1px solid var(--rule); padding-top:9px;
+}
+.marginal b{display:block; font-variant:small-caps; letter-spacing:.13em; font-size:11px; color:var(--ochre); margin-bottom:4px}
+.toc{
+  display:flex; flex-wrap:wrap; justify-content:center; gap:6px 20px;
+  margin:28px auto 0; padding-top:16px; border-top:1px solid var(--rule-soft);
+  font-size:12.5px; letter-spacing:.1em; text-transform:uppercase;
+}
+.toc a{color:var(--ink-soft); text-decoration:none; border-bottom:1px solid rgba(160,128,84,.45); padding-bottom:1px}
+.toc a:hover{color:var(--ox); border-bottom-color:var(--ox)}
+.toc .tn{font-family:var(--display); color:var(--ochre); letter-spacing:.02em; margin-right:4px}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex; justify-content:center; gap:10px; margin:32px 0 0; position:relative; z-index:3}
+.tab{
+  appearance:none; cursor:pointer;
+  display:flex; align-items:baseline; gap:10px;
+  padding:11px 26px 10px;
+  font-family:var(--serif); font-size:16.5px; color:#7d674b;
+  background:linear-gradient(#e8d6b4,#dfc9a1);
+  border:1px solid #b2966b; border-bottom-color:#9c8058;
+  box-shadow:0 1px 0 rgba(255,252,243,.45) inset;
+  transition:background .15s, color .15s;
+}
+.tab .rn{font-family:var(--display); font-size:13px; color:var(--ochre); letter-spacing:.08em}
+.tab small{display:block; font-size:11.5px; font-style:italic; color:var(--ink-faint); letter-spacing:.02em}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{
+  background:var(--paper); color:var(--ink); border-color:#a98f66; border-top-color:var(--ox);
+  position:relative; top:1px; padding-top:12px;
+  box-shadow:0 -2px 8px rgba(80,55,25,.07), inset 0 2px 0 rgba(140,58,43,.5);
+}
+.tab[aria-selected="true"] .rn{color:var(--ox)}
+.tab[aria-selected="true"]::after{content:""; position:absolute; left:0; right:0; bottom:-2px; height:3px; background:var(--paper)}
+.tab:focus-visible{outline:2px solid var(--ox); outline-offset:2px}
+
+/* ---------- sections ---------- */
+.sec{margin-top:58px; scroll-margin-top:24px}
+.sec-head{display:flex; align-items:baseline; gap:16px; border-bottom:1.4px solid var(--ink); padding-bottom:7px}
+.sec-no{font-family:var(--display); font-size:13px; letter-spacing:.18em; color:var(--ox); white-space:nowrap}
+.sec-head h2{margin:0; font-family:var(--display); font-weight:400; font-size:clamp(25px,3.1vw,34px); line-height:1.1; letter-spacing:.3px}
+.sec-head .filler{flex:1; height:6px; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); opacity:.65}
+.dek{margin:12px 0 22px; max-width:78ch; font-size:17.5px; font-style:italic; color:var(--ink-soft)}
+.tiny{font-size:13.5px; line-height:1.5; color:var(--ink-soft)}
+.fine{font-size:14.5px; line-height:1.5; color:var(--ink-soft); font-style:italic}
+p{margin:0 0 1em}
+a{color:var(--ox)}
+
+/* ---------- plate ---------- */
+.plate-frame{
+  border:1px solid var(--rule); background:#f8efdb; padding:0 12px;
+  box-shadow:inset 0 0 34px rgba(150,115,70,.10), 0 1px 0 rgba(255,252,243,.8);
+  position:relative;
+}
+.plate-frame::before{content:""; position:absolute; inset:5px; border:1px solid rgba(160,130,90,.45); pointer-events:none}
+.plate-tools{
+  position:relative; z-index:2; display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px;
+  padding:12px 6px 10px; border-bottom:1px solid var(--rule-soft);
+}
+.btn{
+  appearance:none; cursor:pointer; font-family:var(--serif); font-size:14.5px;
+  color:var(--paper); background:linear-gradient(#6a5136,#4b3823);
+  border:1px solid #3d2d1b; padding:6px 15px 7px;
+  display:inline-flex; align-items:center; gap:8px; border-radius:2px;
+  box-shadow:0 1px 0 rgba(255,248,230,.18) inset;
+}
+.btn:hover{background:linear-gradient(#74593b,#52402a)}
+.btn .lamp{width:7px; height:7px; border-radius:50%; background:#c9a066; opacity:.55; transition:opacity .2s}
+.btn.playing .lamp{background:#e0b46a; opacity:1; animation:lamp 1.4s ease-in-out infinite}
+@keyframes lamp{0%,100%{box-shadow:0 0 0 rgba(224,180,106,0)}50%{box-shadow:0 0 7px 2px rgba(224,180,106,.55)}}
+.viewset{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.mini-lbl{font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); margin-right:2px}
+.chip{
+  appearance:none; cursor:pointer; font-family:var(--serif); font-size:13.5px;
+  color:var(--ink-soft); background:transparent; border:1px solid var(--rule);
+  padding:4px 11px 5px; border-radius:2px; transition:background .15s,color .15s;
+}
+.chip:hover{background:rgba(196,166,120,.16); color:var(--ink)}
+.chip[aria-pressed="true"]{background:#ecdcbc; border-color:#ad9166; color:var(--ink); box-shadow:inset 0 0 0 1px rgba(255,252,243,.5)}
+.chip:focus-visible,.btn:focus-visible{outline:2px solid var(--ox); outline-offset:2px}
+.tog{display:inline-flex; align-items:center; gap:6px; font-size:13.5px; color:var(--ink-soft); cursor:pointer; user-select:none}
+.tog input{accent-color:#8c3a2b; width:13px; height:13px}
+.plate-wrap{position:relative}
+#plate{display:block; width:100%; height:auto; touch-action:none; cursor:grab; user-select:none}
+#plate.grabbing{cursor:grabbing}
+.plate-caption{
+  display:flex; justify-content:space-between; align-items:baseline; gap:16px;
+  border-top:1px solid var(--rule-soft); padding:8px 6px 10px;
+  font-size:10.5px; letter-spacing:.19em; text-transform:uppercase; color:var(--ink-faint);
+}
+.plate-caption em{font-family:var(--serif); font-style:italic; letter-spacing:.02em; text-transform:none; font-size:12.5px; color:var(--ink-soft)}
+.plot-label{paint-order:stroke; stroke:#f8efdb; stroke-width:3.6px; stroke-linejoin:round; font-family:var(--serif); font-style:italic}
+.plot-small{paint-order:stroke; stroke:#f8efdb; stroke-width:3.2px; stroke-linejoin:round; font-family:var(--serif); font-size:10.5px; letter-spacing:.05em}
+.plate-key text{font-family:var(--serif); fill:#7c674b}
+.plate-key .key-title{font-size:9px; letter-spacing:.24em; fill:var(--ochre); text-transform:uppercase}
+.plate-key .key-txt{font-size:11.5px}
+.plate-key line,.plate-key rect,.plate-key circle{vector-effect:non-scaling-stroke}
+.plate-title-block text{font-family:var(--serif); fill:#7c674b}
+.plate-title-block .tb-head{font-size:8.5px; letter-spacing:.26em; fill:var(--ochre); text-transform:uppercase}
+.plate-title-block .tb-title{font-size:13.5px; font-style:italic; fill:#4b3a27}
+.plate-title-block .tb-row{font-size:9.5px; letter-spacing:.05em}
+.plate-title-block .tb-n{font-family:var(--mono); font-size:9px; fill:#5c4a35}
+.plate-title-block line,.plate-title-block rect{vector-effect:non-scaling-stroke}
+.stats{
+  display:grid; grid-template-columns:repeat(4,1fr);
+  border-bottom:1px solid var(--rule); background:rgba(220,195,155,.22);
+}
+.stat{padding:9px 16px 10px; border-right:1px dotted var(--rule)}
+.stat:last-child{border-right:none}
+.stat .sl{display:block; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint)}
+.stat .sv{font-family:var(--mono); font-size:17px; color:var(--ink)}
+.stat .su{font-size:11px; color:var(--ink-faint); margin-left:3px}
+
+/* ---------- DH table ---------- */
+.table-tools{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px 16px; margin-bottom:12px}
+.presets{display:flex; flex-wrap:wrap; gap:7px}
+.linkbtn{
+  appearance:none; background:none; border:none; cursor:pointer;
+  font-family:var(--serif); font-size:13px; font-style:italic; color:var(--ink-soft);
+  border-bottom:1px solid var(--rule); padding:2px 0;
+}
+.linkbtn:hover{color:var(--ox); border-bottom-color:var(--ox)}
+.tablewrap{overflow-x:auto; -webkit-overflow-scrolling:touch}
+table.dh{width:100%; min-width:740px; border-collapse:collapse; font-size:15px; table-layout:fixed}
+.dh col.cj{width:11%}
+.dh col.cp{width:22.25%}
+.dh thead th{
+  font-family:var(--serif); font-weight:500; font-size:15px; color:var(--ink-soft);
+  padding:10px 6px 8px; border-top:1.6px solid var(--ink); border-bottom:1px solid var(--ink);
+  text-align:center; font-variant:small-caps; letter-spacing:.06em;
+}
+.dh thead th .un{display:block; font-size:9.5px; letter-spacing:.2em; color:var(--ink-faint); font-variant:normal; margin-top:2px}
+.dh tbody tr{border-bottom:1px solid var(--rule-soft); cursor:pointer}
+.dh tbody tr:nth-child(even){background:rgba(196,166,120,.07)}
+.dh tbody tr.sel{background:linear-gradient(90deg, rgba(163,122,44,.17), rgba(163,122,44,.035))}
+.dh tbody tr.sel .jidx{color:var(--ox)}
+.dh td{padding:8px 8px 9px; text-align:center; vertical-align:middle; border-right:1px dotted var(--rule-soft)}
+.dh td:last-child{border-right:none}
+.jcell{position:relative}
+.jidx{display:block; font-family:var(--serif); font-size:21px; font-weight:500; line-height:1.05; color:var(--ink-soft); font-variant-numeric:lining-nums tabular-nums; font-feature-settings:"lnum" 1,"tnum" 1}
+.jp{
+  appearance:none; cursor:pointer; margin-top:3px;
+  font-family:var(--mono); font-size:10.5px; line-height:1;
+  width:24px; height:19px; padding:0;
+  border:1px solid var(--rule); background:rgba(255,250,238,.5); color:var(--ink-soft); border-radius:2px;
+}
+.jp:hover{border-color:var(--ox); color:var(--ox)}
+.jp[data-type="P"]{color:var(--ox); border-color:rgba(140,58,43,.55); background:rgba(140,58,43,.07)}
+.dh td.p{position:relative}
+.dh td.p.isvar{background:rgba(163,122,44,.055)}
+.pline{display:flex; align-items:center; justify-content:center; gap:7px; min-height:30px}
+.num{
+  width:72px; padding:2px 2px 3px; text-align:center;
+  font-family:var(--mono); font-size:15px; color:var(--ink);
+  background:transparent; border:none; border-bottom:1px dotted #b39a74; outline:none;
+  -moz-appearance:textfield;
+}
+.num::-webkit-outer-spin-button,.num::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+.num:focus{border-bottom-color:var(--ox); background:rgba(255,251,241,.75)}
+.qtag{
+  font-family:var(--mono); font-size:10.5px; color:var(--ox);
+  border:1px solid rgba(140,58,43,.4); padding:1px 3px; border-radius:2px; line-height:1;
+  background:rgba(255,250,238,.45);
+}
+.qtag sub{font-size:8px}
+.rng{display:block; width:calc(100% - 6px); margin:6px auto 0; height:14px; appearance:none; -webkit-appearance:none; background:transparent; cursor:pointer}
+.rng::-webkit-slider-runnable-track{height:2px; background:linear-gradient(90deg, #c3ab84, #b0976f); border-radius:1px}
+.rng::-webkit-slider-thumb{
+  -webkit-appearance:none; width:11px; height:11px; border-radius:50%; margin-top:-4.5px;
+  background:radial-gradient(circle at 35% 30%, #c39a58, #6d4a22);
+  border:1px solid #583e1d; box-shadow:0 1px 1px rgba(60,40,20,.35);
+}
+.rng::-moz-range-track{height:2px; background:#bda57f}
+.rng::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#8a6132;border:1px solid #583e1d}
+.rng:focus-visible{outline:1px solid var(--ox); outline-offset:3px}
+.footnote{
+  margin-top:12px; padding-top:9px; border-top:1px solid var(--rule-soft);
+  font-size:13.5px; font-style:italic; color:var(--ink-soft); line-height:1.5;
+}
+.footnote b{font-style:normal; font-variant:small-caps; letter-spacing:.08em; color:var(--ochre)}
+.key{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+  margin-top:22px; background:var(--rule-soft); border:1px solid var(--rule-soft);
+}
+.key > div{background:rgba(255,251,241,.5); padding:11px 14px 12px}
+.key .kx{font-family:var(--display); font-size:22px; color:var(--ox); line-height:1.1; display:block; margin-bottom:3px}
+.key p{margin:0; font-size:13px; line-height:1.45; color:var(--ink-soft)}
+
+/* ---------- matrices ---------- */
+.matwrap{display:flex; justify-content:center; overflow-x:auto; padding:2px 0}
+.mat{display:inline-flex; align-items:stretch; justify-content:center; gap:4px; vertical-align:middle; max-width:100%}
+.mat .br{width:6px; border:1.4px solid #3c2f20; flex:none}
+.mat .br.l{border-right:none; border-radius:2px 0 0 2px}
+.mat .br.r{border-left:none; border-radius:0 2px 2px 0}
+.mat table{border-collapse:collapse; background:transparent}
+.mat td{
+  font-family:var(--mono); font-size:13.5px; line-height:1.5;
+  padding:2px 9px; text-align:right; white-space:nowrap; color:#332719;
+}
+.mat td.z{color:#ad9b80}
+.mat.mini td{font-size:12px; padding:1.5px 6px; min-width:31px}
+.mat.sym td{font-family:var(--serif); font-style:italic; font-size:15px; text-align:center; color:#3a2d1f; padding:1px 10px}
+.mat.sym td.z{color:#ad9b80; font-style:normal}
+.mat.sym sub{font-style:italic}
+
+/* ---------- derivation ---------- */
+.chips-row{display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin:0 0 18px}
+.chips-row .lbl{font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint); margin-right:4px}
+.subhead{
+  display:flex; align-items:baseline; gap:12px; margin:26px 0 14px;
+  font-variant:small-caps; letter-spacing:.07em; font-size:15px; color:var(--ink-soft);
+}
+.subhead::after{content:""; flex:1; height:1px; background:var(--rule-soft)}
+.subhead .no{font-family:var(--mono); font-size:10.5px; color:var(--ochre)}
+.moves{display:grid; grid-template-columns:repeat(4,1fr); gap:16px}
+.move{position:relative; margin:0; padding:12px 8px 10px; border:1px solid var(--rule-soft); background:rgba(255,251,241,.38)}
+.move figcaption{
+  display:flex; align-items:baseline; justify-content:center; gap:7px; flex-wrap:wrap;
+  font-size:13.5px; color:var(--ink-soft); min-height:38px; text-align:center; margin-bottom:4px;
+}
+.mv-n{
+  font-family:var(--mono); font-size:9.5px; color:var(--paper); background:var(--ochre);
+  width:16px; height:16px; line-height:16px; text-align:center; border-radius:50%; flex:none;
+  transform:translateY(-1px);
+}
+.move .mv-cap{margin:8px 0 0; text-align:center; font-size:12.5px; letter-spacing:.02em; color:var(--ink-faint)}
+.move .mv-cap b{font-family:var(--mono); font-size:12.5px; font-weight:400; color:var(--ink-soft)}
+.opline{display:flex; align-items:center; justify-content:center; gap:14px; margin:20px 0 18px; color:var(--ink-faint)}
+.opline .ln{height:1px; flex:1; max-width:180px; background:var(--rule-soft)}
+.opline .tx{font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; white-space:nowrap}
+.opline .ar{font-size:15px; color:var(--ochre)}
+.eq{
+  text-align:center; font-size:19px; line-height:1.7; color:var(--ink);
+  margin:0 0 6px;
+}
+.eq .op{color:var(--ink-faint); padding:0 4px}
+.eq-big{font-size:20px; margin-bottom:20px}
+.compose-grid{display:grid; grid-template-columns:1fr 1fr; gap:0; border-top:1px solid var(--rule-soft); border-bottom:1px solid var(--rule-soft); background:rgba(255,251,241,.3)}
+.compose-grid figure{margin:0; padding:16px 18px 14px; min-width:0}
+.compose-grid figure + figure{border-left:1px solid var(--rule-soft); background:rgba(214,190,150,.13)}
+.cs figcaption{text-align:center; font-size:9.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--ochre); margin-bottom:10px}
+.cs .fine{margin:10px 0 0; text-align:center; font-size:12.5px}
+
+/* ---------- chain ---------- */
+.chain{display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:16px}
+.tcard{
+  border:1px solid var(--rule); background:rgba(255,251,241,.4);
+  padding:12px 14px 11px; min-width:0;
+}
+.tcard.is-final{border-color:#ad9166; background:rgba(163,122,44,.09); box-shadow:inset 0 0 0 2px rgba(255,251,241,.5)}
+.tcard-head{display:flex; align-items:baseline; gap:8px; border-bottom:1px solid var(--rule-soft); padding-bottom:7px; margin-bottom:9px}
+.tlabel{font-family:var(--display); font-size:19px; color:var(--ox)}
+.teq{font-size:13.5px; color:var(--ink-faint); letter-spacing:.02em}
+.teq sub{font-size:9px}
+.tcard-foot{margin-top:9px; padding-top:7px; border-top:1px solid var(--rule-soft); font-size:11.5px; color:var(--ink-soft); font-family:var(--mono); text-align:center}
+.pose-final{margin-top:24px; border-top:1.4px solid var(--ink); border-bottom:1.4px solid var(--ink); background:rgba(220,195,155,.14); padding:13px 20px 11px}
+.pf-kicker{text-align:center; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ochre); margin-bottom:10px; line-height:1.8}
+.pf-kicker sub{font-size:8px}
+.pf-grid{display:grid; grid-template-columns:repeat(4,1fr)}
+.pf-cell{display:flex; flex-direction:column; align-items:center; gap:2px; padding:7px 12px 5px; border-right:1px dotted var(--rule); min-width:0}
+.pf-cell:last-child{border-right:none}
+.vk{font-family:var(--display); font-size:19px; line-height:1.1}
+.vk.n{color:var(--ox)} .vk.s{color:var(--teal)} .vk.a{color:var(--blue)} .vk.p{color:var(--ochre)}
+.vt{font-size:9px; letter-spacing:.17em; text-transform:uppercase; color:var(--ink-faint)}
+.vv{font-family:var(--mono); font-size:13px; color:var(--ink); white-space:nowrap; margin-top:2px}
+.pose-final .euler{margin:10px 0 0; padding-top:8px; border-top:1px solid var(--rule-soft); font-size:12.5px; color:var(--ink-soft); font-style:italic; text-align:center}
+.euler b{font-family:var(--mono); font-style:normal; font-weight:400; color:var(--ink)}
+.cmp{width:100%; border-collapse:collapse; table-layout:fixed; margin:8px 0 4px; font-size:12.5px}
+.cmp th:first-child,.cmp td:first-child{width:40%}
+.check-grid > *{min-width:0}
+.cmp th{font-weight:500; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); border-bottom:1px solid var(--rule); padding:4px 3px; text-align:right}
+.cmp th:first-child{text-align:left}
+.cmp td{padding:5px 3px; border-bottom:1px dotted var(--rule-soft); text-align:right; font-family:var(--mono); color:var(--ink)}
+.cmp td:first-child{text-align:left; font-family:var(--serif); font-style:italic; color:var(--ink-soft); white-space:nowrap}
+.cmp tr:last-child td{border-bottom:1px solid var(--rule)}
+
+/* ---------- check ---------- */
+.check-grid{display:grid; grid-template-columns:1.15fr .85fr; gap:26px; align-items:start}
+table.chk{width:100%; border-collapse:collapse; font-size:13px; background:rgba(255,251,241,.35)}
+.chk th{font-weight:500; font-variant:small-caps; letter-spacing:.05em; font-size:12.5px; color:var(--ink-soft); border-top:1px solid var(--ink); border-bottom:1px solid var(--ink); padding:6px 4px; text-align:center}
+.chk td{padding:5px 4px; border-bottom:1px solid var(--rule-soft); text-align:center; font-family:var(--mono); font-size:12.5px; color:var(--ink-soft)}
+.chk td:first-child{color:var(--ochre)}
+.chk tfoot td{border-top:1px solid var(--ink); border-bottom:1.4px solid var(--ink); color:var(--ink); font-size:13px; padding:7px 4px}
+.agree{font-size:14.5px; line-height:1.55; margin:14px 0 0; color:var(--ink-soft)}
+.agree .ok{color:#4b6b4e; font-weight:700}
+.note-box{border:1px solid var(--rule); border-left:3px solid var(--ochre); background:rgba(163,122,44,.07); padding:16px 20px; font-size:15px; color:var(--ink-soft)}
+.note-box p:last-child{margin-bottom:0}
+.note-box .btn{margin-top:10px; font-size:13.5px; padding:5px 12px 6px}
+.planar-copy{font-size:15.5px}
+.formula{font-size:16.5px; text-align:center; color:var(--ink); margin:10px 0 14px; line-height:1.8}
+
+/* ---------- notes ---------- */
+.notes-grid{display:grid; grid-template-columns:1fr 1fr; gap:32px}
+.notes-grid h3{margin:0 0 8px; font-family:var(--display); font-weight:400; font-size:22px; color:#3a2c1d}
+.notes-grid p{font-size:15.5px; line-height:1.6}
+.notes-grid .marginal{float:none; width:auto; margin:14px 0 0; border-top:1px solid var(--rule-soft); border-bottom:1px solid var(--rule-soft); padding:8px 0 9px; font-size:13px}
+.gm{display:flex; justify-content:center; margin:12px 0 6px}
+.exercises{margin:14px 0 0; padding-left:22px; font-size:15.5px; line-height:1.6}
+.exercises li{margin-bottom:9px; padding-left:3px}
+.exercises li::marker{font-family:var(--display); color:var(--ochre)}
+.colophon{margin-top:56px; padding-top:22px; border-top:1px solid var(--rule); text-align:center; font-size:12.5px; color:var(--ink-faint); line-height:1.7}
+.colophon .orn{color:var(--ochre); letter-spacing:.6em; font-size:13px; margin-bottom:10px}
+.colophon p{margin:0 auto 4px; max-width:640px}
+.pageno{margin-top:14px; font-family:var(--mono); font-size:11px; letter-spacing:.2em; color:var(--ink-soft)}
+
+@media (max-width:1000px){
+  .book{padding:34px 34px 46px; margin:16px 12px 40px}
+  .moves{grid-template-columns:1fr 1fr}
+  .notes-grid{grid-template-columns:1fr; gap:22px}
+  .compose-grid{grid-template-columns:1fr}
+  .compose-grid figure + figure{border-left:none; border-top:1px solid var(--rule-soft)}
+  .check-grid{grid-template-columns:1fr}
+  .key{grid-template-columns:1fr 1fr}
+  .marginal{float:none; width:auto; margin:16px 0; padding:10px 14px; border:1px solid var(--rule-soft); border-left:3px solid var(--ochre); background:rgba(255,251,241,.4)}
+}
+@media (max-width:720px){
+  body{font-size:17px}
+  .book{padding:26px 20px 36px; margin:10px 8px 28px}
+  .book::before{inset:8px}
+  .book::after{display:none}
+  .running-head{font-size:9px; letter-spacing:.18em}
+  .running-head span:last-child{display:none}
+  .intro{text-align:left; font-size:17px}
+  .intro::first-letter{font-size:58px}
+  .tabs{gap:6px; flex-wrap:wrap}
+  .tab{padding:9px 14px 8px; font-size:15px; flex:1 1 auto; justify-content:center}
+  .tab small{display:none}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat{border-bottom:1px dotted var(--rule)}
+  .stat:nth-child(2){border-right:none}
+  .stat:nth-child(3),.stat:nth-child(4){border-bottom:none}
+  .sec{margin-top:44px}
+  .sec-head{gap:10px}
+  .sec-head .filler{display:none}
+  table.dh{min-width:0; display:block; font-size:14px; table-layout:auto}
+  .dh colgroup,.dh thead{display:none}
+  .dh tbody{display:block}
+  .dh tbody tr{
+    display:grid; grid-template-columns:1fr 1fr;
+    border:1px solid var(--rule); margin-bottom:12px; background:rgba(255,251,241,.35);
+  }
+  .dh tbody tr:nth-child(even){background:rgba(196,166,120,.09)}
+  .dh tbody tr.sel{background:rgba(163,122,44,.10)}
+  .dh td{padding:8px 10px 9px; border-right:none; border-bottom:1px dotted var(--rule-soft); text-align:left}
+  .dh td.p:nth-last-child(1),.dh td.p:nth-last-child(2){border-bottom:none}
+  .dh td.jcell{
+    grid-column:1 / -1; display:flex; align-items:center; gap:9px;
+    border-bottom:1px solid var(--rule-soft); background:rgba(163,122,44,.06); padding:6px 10px;
+  }
+  .dh td.jcell::before{content:"Joint"; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint)}
+  .dh .jidx{font-size:18px; display:inline}
+  .dh .jp{margin:0 0 0 auto}
+  .dh td.p::before{
+    content:attr(data-label); display:block; margin-bottom:3px;
+    font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint);
+  }
+  .dh .pline{justify-content:flex-start; min-height:28px}
+  .dh .num{width:76px; font-size:14px; text-align:left}
+  .dh .rng{width:100%; margin:5px 0 0}
+  .dh .qtag{font-size:10px}
+  .moves{grid-template-columns:1fr}
+  .key{grid-template-columns:1fr}
+  .compose-grid figure{padding:14px 8px}
+  .mat td{font-size:12.5px; padding:2px 7px}
+  .mat.mini td{font-size:11.5px; padding:1.5px 5px; min-width:28px}
+  .plate-caption{font-size:9px; letter-spacing:.12em}
+  .plate-caption em{font-size:11px}
+  .plate-key,.plate-title-block{display:none}
+  .plate-tools{gap:8px 12px; padding:10px 4px}
+  .toc{font-size:11px; gap:5px 14px}
+  .pf-grid{grid-template-columns:1fr 1fr}
+  .pf-cell{padding:7px 8px}
+  .pf-cell:nth-child(2){border-right:none}
+  .pf-cell:nth-child(1),.pf-cell:nth-child(2){border-bottom:1px dotted var(--rule)}
+  .vv{font-size:10.5px}
+  .pf-kicker{font-size:8.5px; letter-spacing:.13em}
+  .notes-grid p{font-size:15px}
+  .sec-head h2{font-size:23px}
+  .dh td.p:nth-child(2),.dh td.p:nth-child(4){border-right:1px dotted var(--rule-soft)}
+  .table-tools{display:block}
+  .presets{margin-bottom:8px}
+  .linkbtn{display:block; margin-left:auto}
+  .chips-row .lbl{display:none}
+}
+@media print{
+  body{background:#fff}
+  .book{box-shadow:none; border:none; margin:0; max-width:100%}
+  .tabs,.plate-tools,.presets,.linkbtn,.plate-caption{display:none}
+  .grain{display:none}
+}
+</style>
+</head>
+<body>
+
+<svg class="grain" aria-hidden="true" focusable="false">
+  <filter id="grainF">
+    <feTurbulence type="fractalNoise" baseFrequency="0.86" numOctaves="4" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer><feFuncA type="linear" slope="0.55"/></feComponentTransfer>
+  </filter>
+  <rect width="100%" height="100%" filter="url(#grainF)"/>
+</svg>
+
+<div class="book">
+
+  <div class="running-head">
+    <span>Kinematics of Serial Chains</span>
+    <span>Denavit &amp; Hartenberg · MCMLV</span>
+  </div>
+
+  <p class="kicker">A Practical Treatise for Students of Machines</p>
+
+  <h1>The <span class="tname">Denavit–Hartenberg</span> Convention</h1>
+
+  <p class="subtitle">Wherein a manipulator is reduced to four numbers per joint, those numbers to four elementary motions, and the motions to a single chain of matrix products — with a working model the reader may turn.</p>
+
+  <div class="fleuron">❦</div>
+
+  <p class="intro"><span class="lead">The</span> method set down by Denavit and Hartenberg in 1955 answers one stubbornly practical question: how should a coordinate frame be fastened to each link of a chain, so that the relation between neighbouring frames collapses into four numbers? Their answer is a table of four parameters per joint, one matrix per link, and a product that carries the base frame out to the tool. Change a number below and the whole apparatus — drawing, matrices, tool pose — follows at once.</p>
+
+  <nav class="toc" aria-label="Contents">
+    <a href="#sec-1"><span class="tn">I</span> The Mechanism</a>
+    <a href="#sec-2"><span class="tn">II</span> The Table</a>
+    <a href="#sec-3"><span class="tn">III</span> Four Motions</a>
+    <a href="#sec-4"><span class="tn">IV</span> The Chain</a>
+    <a href="#sec-5"><span class="tn">V</span> A Check</a>
+    <a href="#sec-6"><span class="tn">VI</span> Notes</a>
+  </nav>
+
+  <div class="tabs" role="tablist" aria-label="Choose the manipulator">
+    <button class="tab" role="tab" data-tab="2" aria-selected="true" id="tab-2" aria-controls="plate-panel">
+      <span class="rn">I.</span>
+      <span>Two Links<small>planar &amp; vertical</small></span>
+    </button>
+    <button class="tab" role="tab" data-tab="3" aria-selected="false" id="tab-3" aria-controls="plate-panel">
+      <span class="rn">II.</span>
+      <span>Three Links<small>articulated &amp; planar</small></span>
+    </button>
+  </div>
+
+  <!-- ============ I. MECHANISM ============ -->
+  <section class="sec" id="sec-1">
+    <div class="sec-head">
+      <span class="sec-no">§ I</span>
+      <h2>The Mechanism</h2>
+      <span class="filler"></span>
+    </div>
+    <p class="dek">Every joint contributes one motion: a turn or a slide. The plate is drawn directly from the table beneath it, so the links are the translations and the joints are the rotations. Drag to turn the model; change a parameter and watch it answer.</p>
+
+    <div class="plate-frame" role="tabpanel" id="plate-panel" aria-labelledby="tab-2">
+      <div class="plate-tools">
+        <button class="btn" id="animBtn" type="button"><span class="lamp"></span><span id="animTxt">Animate the joints</span></button>
+        <div class="viewset">
+          <span class="mini-lbl">View</span>
+          <button class="chip" data-view="iso" aria-pressed="true">Isometric</button>
+          <button class="chip" data-view="elev" aria-pressed="false">Elevation</button>
+          <button class="chip" data-view="plan" aria-pressed="false">Plan</button>
+        </div>
+        <label class="tog"><input type="checkbox" id="togFrames" checked> frames</label>
+        <label class="tog"><input type="checkbox" id="togGrid" checked> ground</label>
+      </div>
+
+      <div class="plate-wrap">
+        <svg id="plate" viewBox="0 0 780 520" role="img" aria-label="Three-dimensional drawing of the selected manipulator, with coordinate frames at each joint">
+          <defs>
+            <pattern id="brass" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+              <rect width="7" height="7" fill="#c9ad80"/>
+              <line x1="0" y1="0" x2="0" y2="7" stroke="#a8895c" stroke-width="1.15"/>
+              <line x1="3.5" y1="0" x2="3.5" y2="7" stroke="#e3d0aa" stroke-width="0.7" opacity=".65"/>
+            </pattern>
+            <pattern id="hatchBase" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="7" height="7" fill="#eaddc0"/>
+              <line x1="0" y1="0" x2="0" y2="7" stroke="#b29a72" stroke-width="0.85" opacity=".9"/>
+            </pattern>
+            <radialGradient id="baseGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="60%" stop-color="#f3e7cd" stop-opacity="0"/>
+              <stop offset="100%" stop-color="#8a6b43" stop-opacity=".16"/>
+            </radialGradient>
+          </defs>
+          <g id="scene"></g>
+          <g class="plate-key" aria-hidden="true">
+            <text x="42" y="36" class="key-title">Key to the frames</text>
+            <line x1="42" y1="57" x2="72" y2="57" stroke="#9c3f2e" stroke-width="1.6"/>
+            <text x="80" y="60.5" class="key-txt"><tspan font-style="italic">x</tspan><tspan dx="9">common normal</tspan></text>
+            <line x1="42" y1="77" x2="72" y2="77" stroke="#3d5477" stroke-width="1.2" stroke-dasharray="5 4"/>
+            <text x="80" y="80.5" class="key-txt"><tspan font-style="italic">z</tspan><tspan dx="9">axis of the joint</tspan></text>
+            <line x1="42" y1="97" x2="72" y2="97" stroke="#4a6b52" stroke-width="1.1" stroke-dasharray="1 3"/>
+            <text x="80" y="100.5" class="key-txt"><tspan font-style="italic">y</tspan><tspan dx="9">completes the triad</tspan></text>
+            <circle cx="48" cy="119" r="5.6" fill="#f8efdb" stroke="#4b3a27" stroke-width="1.3"/>
+            <circle cx="48" cy="119" r="1.8" fill="#4b3a27"/>
+            <text x="80" y="122.5" class="key-txt">revolute joint</text>
+            <rect x="43" y="137" width="10" height="10" fill="#f8efdb" stroke="#4b3a27" stroke-width="1.3" transform="rotate(45 48 142)"/>
+            <text x="80" y="146" class="key-txt">prismatic joint</text>
+            <circle cx="48" cy="166" r="8" fill="none" stroke="#8c3a2b" stroke-width="1" stroke-dasharray="2.5 3"/>
+            <circle cx="48" cy="166" r="2.4" fill="#8c3a2b"/>
+            <text x="80" y="169.5" class="key-txt">tool point</text>
+          </g>
+          <g class="plate-title-block" aria-hidden="true">
+            <rect x="552" y="26" width="194" height="122" fill="#f8efdb" fill-opacity=".78" stroke="#b49a71" stroke-width="1"/>
+            <rect x="557" y="31" width="184" height="112" fill="none" stroke="#d9c7a3" stroke-width=".7"/>
+            <text x="568" y="49" class="tb-head">Fig. I</text>
+            <text x="568" y="67" class="tb-title">The kinematic chain</text>
+            <line x1="568" y1="75" x2="730" y2="75" stroke="#c0a87f" stroke-width=".8"/>
+            <g id="tbMeta"></g>
+          </g>
+        </svg>
+      </div>
+
+      <div class="plate-caption">
+        <span>Plate I · The chain of frames</span>
+        <em>drag to orbit · every figure computed live</em>
+      </div>
+    </div>
+
+    <div class="stats" id="stats" aria-label="Tool position readout"></div>
+  </section>
+
+  <!-- ============ II. TABLE ============ -->
+  <section class="sec" id="sec-2">
+    <div class="sec-head">
+      <span class="sec-no">§ II</span>
+      <h2>The Table of Parameters</h2>
+      <span class="filler"></span>
+    </div>
+    <p class="dek">Four numbers per joint, whose meanings are fixed by the frame convention. Choose whether a joint turns or slides; the cell that carries the variable is marked <span class="qtag">q<sub>i</sub></span>.</p>
+
+    <div class="table-tools">
+      <div class="presets" id="presets"></div>
+      <button class="linkbtn" id="restoreBtn" type="button">restore the preset</button>
+    </div>
+
+    <div class="tablewrap">
+      <table class="dh" id="dhTable">
+        <colgroup>
+          <col class="cj"><col class="cp"><col class="cp"><col class="cp"><col class="cp">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Joint</th>
+            <th>θ<sub>i</sub><span class="un">angle · deg</span></th>
+            <th>d<sub>i</sub><span class="un">offset</span></th>
+            <th>a<sub>i</sub><span class="un">length</span></th>
+            <th>α<sub>i</sub><span class="un">twist · deg</span></th>
+          </tr>
+        </thead>
+        <tbody id="dhBody"></tbody>
+      </table>
+    </div>
+
+    <p class="footnote"><b>Note.</b> The shaded cell is the joint variable <i>q<sub>i</sub></i> — θ for a revolute joint, d for a prismatic one; press the <b>R</b>/<b>P</b> button in the joint column to change the kind of joint. Angles are entered in degrees; every matrix on this page is evaluated in radians. Lengths are given in arbitrary units, and the drawing rescales itself to fit them.</p>
+
+    <div class="key" aria-label="Meaning of the four parameters">
+      <div><span class="kx">θ<sub>i</sub></span><p>Joint angle: rotation about <i>z</i><sub>i−1</sub>, from <i>x</i><sub>i−1</sub> to <i>x</i><sub>i</sub>.</p></div>
+      <div><span class="kx">d<sub>i</sub></span><p>Link offset: translation along <i>z</i><sub>i−1</sub>, from the origin of {i−1} to the foot of the common normal.</p></div>
+      <div><span class="kx">a<sub>i</sub></span><p>Link length: translation along <i>x</i><sub>i</sub>, along the common normal between the two joint axes.</p></div>
+      <div><span class="kx">α<sub>i</sub></span><p>Link twist: rotation about <i>x</i><sub>i</sub>, from <i>z</i><sub>i−1</sub> to <i>z</i><sub>i</sub>.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ III. DERIVATION ============ -->
+  <section class="sec" id="sec-3">
+    <div class="sec-head">
+      <span class="sec-no">§ III</span>
+      <h2>Four Motions, One Matrix</h2>
+      <span class="filler"></span>
+    </div>
+    <p class="dek">The transform from frame {j−1} to frame {j} is assembled from four elementary motions, performed in a fixed order. Select a joint to see its own four matrices and the link matrix they compose.</p>
+
+    <div class="chips-row" id="jointChips"><span class="lbl">Joint under examination</span></div>
+
+    <div class="subhead"><span class="no">1–4</span><span>The four elementary transformations</span></div>
+
+    <div class="moves" id="moves"></div>
+
+    <div class="opline"><span class="ln"></span><span class="ar">↓</span><span class="tx">multiply in this order</span><span class="ar">↓</span><span class="ln"></span></div>
+
+    <div id="compose"></div>
+  </section>
+
+  <!-- ============ IV. CHAIN ============ -->
+  <section class="sec" id="sec-4">
+    <div class="sec-head">
+      <span class="sec-no">§ IV</span>
+      <h2>The Chain of Transformations</h2>
+      <span class="filler"></span>
+    </div>
+    <p class="dek">Multiply the link matrices in order and each product gives the pose of one more frame in the base. The last product is the tool pose — the whole forward kinematics of the arm in a single matrix.</p>
+
+    <div class="chain" id="chain"></div>
+    <div id="pose"></div>
+  </section>
+
+  <!-- ============ V. CHECK ============ -->
+  <section class="sec" id="sec-5">
+    <div class="sec-head">
+      <span class="sec-no">§ V</span>
+      <h2>A Check by Hand</h2>
+      <span class="filler"></span>
+    </div>
+    <p class="dek">A matrix product is easy to trust and hard to believe. When every twist α<sub>i</sub> vanishes, the chain lies in parallel planes, and the tool position may be written out by ordinary trigonometry. The two routes should agree.</p>
+
+    <div id="check"></div>
+  </section>
+
+  <!-- ============ VI. NOTES ============ -->
+  <section class="sec" id="sec-6">
+    <div class="sec-head">
+      <span class="sec-no">§ VI</span>
+      <h2>Notes on the Convention</h2>
+      <span class="filler"></span>
+    </div>
+
+    <div class="notes-grid">
+      <div>
+        <h3>What the convention fixes</h3>
+        <p>This page uses the <b>standard</b> (or <i>distal</i>) convention: frame {i} is fastened to link i, its <i>z</i><sub>i−1</sub> axis lies along the axis of joint i, and its <i>x</i><sub>i</sub> axis lies along the common normal from <i>z</i><sub>i−1</sub> to <i>z</i><sub>i</sub>. The link transform is then</p>
+        <p class="eq">A<sub>i</sub> = R<sub>z</sub>(θ<sub>i</sub>) · T<sub>z</sub>(d<sub>i</sub>) · T<sub>x</sub>(a<sub>i</sub>) · R<sub>x</sub>(α<sub>i</sub>)</p>
+        <p>so that <span style="white-space:nowrap"><i>T</i><sup>0</sup><sub>n</sub> = A<sub>1</sub>A<sub>2</sub>⋯A<sub>n</sub></span>. The <b>modified</b> (or <i>proximal</i>) convention reorders the same four motions and numbers the parameters differently; matrices from the two conventions are not interchangeable. State which one is in use before comparing results.</p>
+        <p class="marginal"><b>Origin of the method</b>J. Denavit and R. S. Hartenberg, “A kinematic notation for lower-pair mechanisms based on matrices,” <i>Journal of Applied Mechanics</i>, 22(2):215–221, 1955.</p>
+      </div>
+      <div>
+        <h3>How to read a homogeneous matrix</h3>
+        <p>The upper-left 3×3 block is a rotation: its columns are the <i>x</i>, <i>y</i>, <i>z</i> axes of the new frame, written in the old one. The upper-right 3×1 column is the position of the new origin. The bottom row is always 0 0 0 1, which is what lets a chain of motions be carried by a single product.</p>
+        <div class="gm" id="blockMatrix"></div>
+        <p class="fine" style="text-align:center;margin-top:2px">T = [ R | p ; 0 0 0 | 1 ] — rotation, position, and the row that keeps the arithmetic homogeneous.</p>
+
+        <h3 style="margin-top:22px">Exercises for the student</h3>
+        <ol class="exercises">
+          <li>Turn the first joint through a full revolution. Which entries of A<sub>1</sub> move, and which refuse to? Explain both facts from the four elementary motions.</li>
+          <li>Set a<sub>1</sub> = 0 and α<sub>1</sub> = 90°. Where do the axes <i>z</i><sub>0</sub> and <i>z</i><sub>1</sub> now meet, and what does d<sub>1</sub> measure?</li>
+          <li>Make the second joint prismatic. Which entry of A<sub>2</sub> carries the variable, and why does the arm slide instead of swing?</li>
+          <li>Load a planar preset and read § V. Do the closed form and the matrix product agree? Then set α<sub>1</sub> = 90° and see why the check no longer applies.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <div class="orn">✦ ❦ ✦</div>
+    <p>Standard distal Denavit–Hartenberg convention. Every plate, table and matrix on this page is computed in the browser from the parameters above; nothing is prefigured.</p>
+    <p>Drag the plate to orbit the model. Lengths are in arbitrary units; angles in degrees.</p>
+    <p class="pageno">— 1 —</p>
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   Constants, helpers
+   ============================================================ */
+const D2R = Math.PI / 180;
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const round1 = v => Math.round(v * 10) / 10;
+const tidy = v => String(round1(v));
+const SUB = (s, size = 8.5) => '<tspan font-size="' + size + '" dy="2.6">' + s + '</tspan>';
+
+function fmt(v, dec = 2) {
+  if (!isFinite(v)) return '—';
+  if (Math.abs(v) < 0.005) return '0';
+  return v.toFixed(dec);
+}
+function fmtCell(v) {
+  if (Math.abs(v) < 0.005) return 0;
+  return v;
+}
+function isZeroDeg(v) {
+  const a = ((v % 360) + 360) % 360;
+  return a < 1e-9 || a > 360 - 1e-9;
+}
+
+/* ============================================================
+   Data
+   ============================================================ */
+const PRESETS = {
+  2: [
+    { key: 'planar', name: 'Planar 2R', links: [
+      { theta: 35, d: 0, a: 120, alpha: 0, type: 'R' },
+      { theta: 55, d: 0, a: 90,  alpha: 0, type: 'R' }
+    ]},
+    { key: 'vertical', name: 'Vertical 2R', links: [
+      { theta: 25,  d: 70, a: 0,   alpha: 90, type: 'R' },
+      { theta: -40, d: 0,  a: 150, alpha: 0,  type: 'R' }
+    ]}
+  ],
+  3: [
+    { key: 'articulated', name: 'Articulated 3R', links: [
+      { theta: 20,  d: 80, a: 0,   alpha: 90, type: 'R' },
+      { theta: -40, d: 0,  a: 125, alpha: 0,  type: 'R' },
+      { theta: 65,  d: 0,  a: 80,  alpha: 0,  type: 'R' }
+    ]},
+    { key: 'planar', name: 'Planar 3R', links: [
+      { theta: 30,  d: 0, a: 110, alpha: 0, type: 'R' },
+      { theta: 45,  d: 0, a: 95,  alpha: 0, type: 'R' },
+      { theta: -40, d: 0, a: 70,  alpha: 0, type: 'R' }
+    ]}
+  ]
+};
+
+const state = {
+  n: 2,
+  selected: 0,
+  view: { az: -0.72, el: 0.42 },
+  showFrames: true,
+  showGrid: true,
+  data: {},
+  lastPreset: {},
+  dirty: {},
+  anim: { playing: false, raf: 0, base: null, t0: 0, lastT: 0 },
+  last: null
+};
+
+[2, 3].forEach(n => {
+  state.data[n] = PRESETS[n][0].links.map(L => ({ ...L }));
+  state.lastPreset[n] = PRESETS[n][0].key;
+  state.dirty[n] = false;
+});
+
+/* ============================================================
+   Matrices
+   ============================================================ */
+function dhMatrix(thetaDeg, d, a, alphaDeg) {
+  const t = thetaDeg * D2R, al = alphaDeg * D2R;
+  const ct = Math.cos(t), st = Math.sin(t);
+  const ca = Math.cos(al), sa = Math.sin(al);
+  return [
+    [ct, -st * ca,  st * sa, a * ct],
+    [st,  ct * ca, -ct * sa, a * st],
+    [0,   sa,       ca,      d],
+    [0,   0,        0,       1]
+  ];
+}
+function mul4(A, B) {
+  const C = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+  for (let i = 0; i < 4; i++)
+    for (let j = 0; j < 4; j++) {
+      let s = 0;
+      for (let k = 0; k < 4; k++) s += A[i][k] * B[k][j];
+      C[i][j] = s;
+    }
+  return C;
+}
+function fk() {
+  const links = state.data[state.n];
+  let T = [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]];
+  const frames = [{ o: [0,0,0], R: [[1,0,0],[0,1,0],[0,0,1]] }];
+  const As = [], cums = [];
+  links.forEach(L => {
+    const A = dhMatrix(L.theta, L.d, L.a, L.alpha);
+    As.push(A);
+    T = mul4(T, A);
+    cums.push(T);
+    frames.push({
+      o: [T[0][3], T[1][3], T[2][3]],
+      R: [[T[0][0], T[0][1], T[0][2]],
+          [T[1][0], T[1][1], T[1][2]],
+          [T[2][0], T[2][1], T[2][2]]]
+    });
+  });
+  return { links, As, cums, T, frames };
+}
+
+/* ============================================================
+   Matrix markup
+   ============================================================ */
+function matHTML(rows, opt = {}) {
+  const cls = 'mat' + (opt.mini ? ' mini' : '') + (opt.sym ? ' sym' : '');
+  let body = '';
+  for (const row of rows) {
+    body += '<tr>';
+    for (const raw of row) {
+      let text, dim = false;
+      if (typeof raw === 'number') {
+        dim = Math.abs(raw) < 0.005;
+        if (dim) text = '0';
+        else if (Math.abs(raw - Math.round(raw)) < 1e-9) text = String(Math.round(raw));
+        else text = fmt(raw);
+      } else {
+        text = raw;
+      }
+      body += '<td' + (dim ? ' class="z"' : '') + '>' + text + '</td>';
+    }
+    body += '</tr>';
+  }
+  return '<div class="' + cls + '"><span class="br l"></span><table>' + body + '</table><span class="br r"></span></div>';
+}
+
+/* ============================================================
+   DH table
+   ============================================================ */
+const PARAM_LABEL = { theta: 'theta', d: 'd', a: 'a', alpha: 'alpha' };
+
+function renderPresets() {
+  const n = state.n;
+  $('#presets').innerHTML = PRESETS[n].map(p =>
+    '<button class="chip" type="button" data-preset="' + p.key + '" aria-pressed="' +
+    (!state.dirty[n] && p.key === state.lastPreset[n]) + '">' + p.name + '</button>'
+  ).join('');
+}
+
+const PARAM_SHORT = { theta: 'θ · deg', d: 'd · offset', a: 'a · length', alpha: 'α · deg' };
+
+function paramCell(L, i, p, isVar) {
+  const isAngle = (p === 'theta' || p === 'alpha');
+  const val = round1(L[p]);
+  const step = isAngle ? 0.5 : 1;
+  const min = p === 'theta' ? -360 : -200;
+  const max = p === 'theta' ? 360 : 300;
+  let h = '<td class="p' + (isVar ? ' isvar' : '') + '" data-label="' + PARAM_SHORT[p] + '">';
+  h += '<div class="pline"><input class="num" type="number" step="' + step + '" value="' + val +
+       '" data-i="' + i + '" data-p="' + p + '" aria-label="' + PARAM_LABEL[p] +
+       ' of joint ' + (i + 1) + '">';
+  if (isVar) h += '<span class="qtag">q<sub>' + (i + 1) + '</sub></span>';
+  h += '</div>';
+  if (isVar) {
+    h += '<input class="rng" type="range" min="' + min + '" max="' + max + '" step="' + step +
+         '" value="' + clamp(val, min, max) + '" data-i="' + i + '" data-p="' + p +
+         '" aria-label="slide ' + PARAM_LABEL[p] + ' of joint ' + (i + 1) + '">';
+  }
+  h += '</td>';
+  return h;
+}
+
+function renderTable() {
+  const links = state.data[state.n];
+  const s = state.selected;
+  $('#dhBody').innerHTML = links.map((L, i) => {
+    const varP = L.type === 'R' ? 'theta' : 'd';
+    return '<tr data-row="' + i + '" class="' + (i === s ? 'sel' : '') + '">' +
+      '<td class="jcell"><span class="jidx">' + (i + 1) + '</span>' +
+        '<button class="jp" type="button" data-jp="' + i + '" data-type="' + L.type + '" title="' +
+        (L.type === 'R' ? 'Revolute joint — click for prismatic' : 'Prismatic joint — click for revolute') +
+        '">' + L.type + '</button></td>' +
+      paramCell(L, i, 'theta', varP === 'theta') +
+      paramCell(L, i, 'd', varP === 'd') +
+      paramCell(L, i, 'a', false) +
+      paramCell(L, i, 'alpha', false) +
+      '</tr>';
+  }).join('');
+}
+
+function syncTable(f) {
+  f.links.forEach((L, i) => {
+    ['theta', 'd', 'a', 'alpha'].forEach(p => {
+      const inp = $('input.num[data-i="' + i + '"][data-p="' + p + '"]');
+      if (inp && document.activeElement !== inp) {
+        const v = String(round1(L[p]));
+        if (inp.value !== v) inp.value = v;
+      }
+      const rng = $('input.rng[data-i="' + i + '"][data-p="' + p + '"]');
+      if (rng) rng.value = clamp(L[p], +rng.min, +rng.max);
+    });
+  });
+}
+
+function markDirty() {
+  state.dirty[state.n] = true;
+  $$('#presets .chip').forEach(b => b.setAttribute('aria-pressed', 'false'));
+}
+
+function loadPreset(n, key) {
+  const p = PRESETS[n].find(x => x.key === key) || PRESETS[n][0];
+  state.data[n] = p.links.map(L => ({ ...L }));
+  state.lastPreset[n] = p.key;
+  state.dirty[n] = false;
+  stopAnim();
+  renderPresets();
+  renderTable();
+  renderAll();
+}
+
+/* ============================================================
+   Plate
+   ============================================================ */
+const AXCOL = { x: '#9c3f2e', y: '#4a6b52', z: '#3d5477' };
+
+function polyPath(pts) {
+  return pts.map((p, i) => (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' ') + ' Z';
+}
+
+function renderPlate(f) {
+  const W = 780, H = 520;
+  const links = f.links;
+  const worldR = Math.max(90, links.reduce((s, L) => s + Math.abs(L.a) + Math.abs(L.d), 0) + 10);
+  const az = state.view.az, el = state.view.el;
+  const isPlan = el > 1.35;
+  const scale = (isPlan ? Math.min(W * 0.44, H * 0.46) : Math.min(W * 0.47, H * 0.64)) / worldR;
+  const ca = Math.cos(az), sa = Math.sin(az);
+  const ce = Math.cos(el), se = Math.sin(el);
+  const cx = W / 2;
+  const cy = isPlan ? H * 0.52 : H * 0.64 + ce * 0.02 * worldR * scale;
+
+  const proj = p => {
+    const sx = -sa * p[0] + ca * p[1];
+    const sy = -se * ca * p[0] - se * sa * p[1] + ce * p[2];
+    return {
+      x: cx + sx * scale,
+      y: cy - sy * scale,
+      d: ce * ca * p[0] + ce * sa * p[1] + se * p[2]
+    };
+  };
+  const ln = (a, b, attrs) =>
+    '<line x1="' + a.x.toFixed(1) + '" y1="' + a.y.toFixed(1) +
+    '" x2="' + b.x.toFixed(1) + '" y2="' + b.y.toFixed(1) + '" ' + attrs + '/>';
+  const addv = (a, b, k) => [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k];
+
+  let out = '';
+
+  /* ---- ground ---- */
+  if (state.showGrid) {
+    const G = worldR * 0.84;
+    const steps = 4;
+    out += '<g opacity=".85">';
+    for (let i = -steps; i <= steps; i++) {
+      const t = G * i / steps;
+      out += ln(proj([-G, t, 0]), proj([G, t, 0]),
+        'stroke="#8d7550" stroke-opacity="' + (i === 0 ? '.32' : '.17') + '" stroke-width=".9" vector-effect="non-scaling-stroke"');
+      out += ln(proj([t, -G, 0]), proj([t, G, 0]),
+        'stroke="#8d7550" stroke-opacity="' + (i === 0 ? '.32' : '.17') + '" stroke-width=".9" vector-effect="non-scaling-stroke"');
+    }
+    const R = Math.max(28, worldR * 0.25);
+    const pts = [];
+    for (let i = 0; i <= 56; i++) {
+      const th = i / 56 * Math.PI * 2;
+      pts.push(proj([R * Math.cos(th), R * Math.sin(th), 0]));
+    }
+    out += '<path d="' + polyPath(pts) + '" fill="url(#hatchBase)" stroke="#a98a5c" stroke-width="1" opacity=".85"/>';
+    const inner = [];
+    for (let i = 0; i <= 56; i++) {
+      const th = i / 56 * Math.PI * 2;
+      inner.push(proj([R * 0.66 * Math.cos(th), R * 0.66 * Math.sin(th), 0]));
+    }
+    out += '<path d="' + polyPath(inner) + '" fill="none" stroke="#b49a71" stroke-width=".8" stroke-opacity=".8"/>';
+    out += '<circle cx="' + proj([0,0,0]).x.toFixed(1) + '" cy="' + proj([0,0,0]).y.toFixed(1) + '" r="' +
+           (1.7 * scale * 2).toFixed(1) + '" fill="#6d5637" opacity=".5"/>';
+    out += '</g>';
+  }
+
+  /* ---- frames ---- */
+  if (state.showFrames) {
+    out += '<g>';
+    f.frames.forEach((F, i) => {
+      const o = F.o;
+      const oS = proj(o);
+      const xd = [F.R[0][0], F.R[1][0], F.R[2][0]];
+      const yd = [F.R[0][1], F.R[1][1], F.R[2][1]];
+      const zd = [F.R[0][2], F.R[1][2], F.R[2][2]];
+      const Lx = worldR * 0.125, Lz = worldR * 0.155;
+
+      // z axis: the axis of the joint below, shown passing through
+      const zTop = proj(addv(o, zd, Lz));
+      const zBot = proj(addv(o, zd, -Lz * 0.35));
+      const zVis = Math.hypot(zTop.x - zBot.x, zTop.y - zBot.y) > 5;
+      if (zVis) {
+        out += ln(zTop, zBot,
+          'stroke="' + AXCOL.z + '" stroke-opacity=".72" stroke-width="1.15" stroke-dasharray="5 4" vector-effect="non-scaling-stroke"');
+      }
+      // y axis, faint
+      const yTip = proj(addv(o, yd, Lx * 0.8));
+      out += ln(oS, yTip,
+        'stroke="' + AXCOL.y + '" stroke-opacity=".38" stroke-width="1" stroke-dasharray="1 3" vector-effect="non-scaling-stroke"');
+      // x axis
+      const xTip = proj(addv(o, xd, Lx));
+      const xVis = Math.hypot(xTip.x - oS.x, xTip.y - oS.y) > 4;
+      if (xVis) {
+        out += ln(oS, xTip,
+          'stroke="' + AXCOL.x + '" stroke-opacity=".92" stroke-width="1.5" vector-effect="non-scaling-stroke"');
+      }
+      // origin tick
+      out += '<circle cx="' + oS.x.toFixed(1) + '" cy="' + oS.y.toFixed(1) + '" r="1.7" fill="#3a2d1e"/>';
+
+      // labels
+      if (xVis) {
+        out += '<text x="' + (xTip.x + 5).toFixed(1) + '" y="' + (xTip.y + 3.5).toFixed(1) +
+               '" class="plot-label" font-size="13" fill="' + AXCOL.x + '">x' + SUB(i) + '</text>';
+      }
+      if (zVis) {
+        out += '<text x="' + (zTop.x + 5).toFixed(1) + '" y="' + (zTop.y - 4).toFixed(1) +
+               '" class="plot-label" font-size="13" fill="' + AXCOL.z + '">z' + SUB(i) + '</text>';
+      }
+    });
+    out += '</g>';
+  }
+
+  /* ---- links, far to near ---- */
+  const segs = [];
+  for (let i = 0; i < links.length; i++) {
+    const p1 = proj(f.frames[i].o);
+    const p2 = proj(f.frames[i + 1].o);
+    const dx = p2.x - p1.x, dy = p2.y - p1.y;
+    if (Math.hypot(dx, dy) < 1.2) continue;
+    segs.push({ i, p1, p2, d: (p1.d + p2.d) / 2 });
+  }
+  segs.sort((a, b) => a.d - b.d);
+  out += '<g>';
+  segs.forEach(sg => {
+    const sel = sg.i === state.selected;
+    const stroke = sel ? 'stroke="#8c3a2b"' : 'stroke="#4b3a27"';
+    out += ln(sg.p1, sg.p2, stroke + ' stroke-width="' + (sel ? 9.6 : 8.6) + '" stroke-linecap="round"');
+    out += ln(sg.p1, sg.p2, 'stroke="url(#brass)" stroke-width="' + (sel ? 7 : 6) + '" stroke-linecap="round"');
+    out += ln(sg.p1, sg.p2, 'stroke="#f3e6cc" stroke-opacity=".35" stroke-width="1.1" stroke-linecap="round"');
+  });
+  out += '</g>';
+
+  /* ---- joints ---- */
+  out += '<g>';
+  for (let i = 0; i < links.length; i++) {
+    const o = f.frames[i].o;
+    const p = proj(o);
+    const sel = i === state.selected;
+    const L = links[i];
+    if (L.type === 'R') {
+      out += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="' + (sel ? 8.4 : 7.2) +
+             '" fill="#f8efdb" stroke="' + (sel ? '#8c3a2b' : '#4b3a27') + '" stroke-width="1.5"/>';
+      out += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.5" fill="' +
+             (sel ? '#8c3a2b' : '#4b3a27') + '"/>';
+    } else {
+      out += '<rect x="' + (p.x - 6.6).toFixed(1) + '" y="' + (p.y - 6.6).toFixed(1) +
+             '" width="13.2" height="13.2" fill="#f8efdb" stroke="' + (sel ? '#8c3a2b' : '#4b3a27') +
+             '" stroke-width="1.5" transform="rotate(45 ' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')"/>';
+      out += '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="1.8" fill="#4b3a27"/>';
+    }
+    // joint label, offset perpendicular to the outgoing link
+    const q = proj(f.frames[i + 1].o);
+    let nx = -(q.y - p.y), ny = (q.x - p.x);
+    const nl = Math.hypot(nx, ny) || 1;
+    nx /= nl; ny /= nl;
+    if (ny > 0) { nx = -nx; ny = -ny; }
+    if (Math.abs(nx) + Math.abs(ny) < 0.1) { nx = 0; ny = -1; }
+    out += '<text x="' + (p.x + nx * 20).toFixed(1) + '" y="' + (p.y + ny * 20 + 3.5).toFixed(1) +
+           '" class="plot-small" text-anchor="middle" fill="#6d5a43" font-size="10.5">J' + SUB(i + 1, 7.5) + '</text>';
+  }
+  out += '</g>';
+
+  /* ---- tool ---- */
+  const tp = proj(f.frames[f.frames.length - 1].o);
+  out += '<g>';
+  out += '<circle cx="' + tp.x.toFixed(1) + '" cy="' + tp.y.toFixed(1) + '" r="10.5" fill="none" stroke="#8c3a2b" stroke-width="1" stroke-dasharray="2.5 3" opacity=".85"/>';
+  out += '<circle cx="' + tp.x.toFixed(1) + '" cy="' + tp.y.toFixed(1) + '" r="3" fill="#8c3a2b"/>';
+  out += '<text x="' + (tp.x + 14).toFixed(1) + '" y="' + (tp.y + 19).toFixed(1) +
+         '" class="plot-small" fill="#8c3a2b" font-size="10.5" letter-spacing="1.4">TOOL</text>';
+  out += '</g>';
+
+  $('#scene').innerHTML = out;
+
+  const spatial = links.some(L => !isZeroDeg(L.alpha));
+  const jointTag = links.map(L => L.type).join(' · ');
+  $('#tbMeta').innerHTML =
+    '<text x="568" y="90" class="tb-row">types <tspan class="tb-n">' + jointTag + '</tspan></text>' +
+    '<text x="568" y="105" class="tb-row">frames <tspan class="tb-n">' + (links.length + 1) +
+      '</tspan> · dof <tspan class="tb-n">' + links.length + '</tspan></text>' +
+    '<text x="568" y="120" class="tb-row"><tspan class="tb-n">' + (spatial ? 'spatial' : 'planar') + '</tspan> chain</text>' +
+    '<text x="568" y="135" class="tb-row">scale <tspan class="tb-n">arbitrary</tspan></text>';
+}
+
+/* ============================================================
+   Derivation
+   ============================================================ */
+const SYM = [
+  ['c<sub>θ</sub>', '−s<sub>θ</sub>c<sub>α</sub>', 's<sub>θ</sub>s<sub>α</sub>', 'a c<sub>θ</sub>'],
+  ['s<sub>θ</sub>', 'c<sub>θ</sub>c<sub>α</sub>', '−c<sub>θ</sub>s<sub>α</sub>', 'a s<sub>θ</sub>'],
+  [0, 's<sub>α</sub>', 'c<sub>α</sub>', 'd'],
+  [0, 0, 0, 1]
+];
+
+function renderDerivation(f) {
+  const s = state.selected;
+  const j = s + 1;
+  const L = f.links[s];
+  const A = f.As[s];
+
+  $('#jointChips').innerHTML = '<span class="lbl">Joint under examination</span>' +
+    f.links.map((_, i) =>
+      '<button class="chip" type="button" data-joint="' + i + '" aria-pressed="' + (i === s) + '">Joint ' + (i + 1) + '</button>'
+    ).join('');
+
+  const t = L.theta * D2R, al = L.alpha * D2R;
+  const ct = Math.cos(t), st = Math.sin(t);
+  const ca = Math.cos(al), sa = Math.sin(al);
+
+  const moves = [
+    { n: 1, title: 'Rotate about <i>z</i><sub>' + (j - 1) + '</sub>',
+      m: [[ct, -st, 0, 0], [st, ct, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+      cap: 'by θ<sub>' + j + '</sub> = <b>' + tidy(L.theta) + '°</b>' },
+    { n: 2, title: 'Translate along <i>z</i><sub>' + (j - 1) + '</sub>',
+      m: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, L.d], [0, 0, 0, 1]],
+      cap: 'by d<sub>' + j + '</sub> = <b>' + tidy(L.d) + '</b>' },
+    { n: 3, title: 'Translate along <i>x</i><sub>' + j + '</sub>',
+      m: [[1, 0, 0, L.a], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+      cap: 'by a<sub>' + j + '</sub> = <b>' + tidy(L.a) + '</b>' },
+    { n: 4, title: 'Rotate about <i>x</i><sub>' + j + '</sub>',
+      m: [[1, 0, 0, 0], [0, ca, -sa, 0], [0, sa, ca, 0], [0, 0, 0, 1]],
+      cap: 'by α<sub>' + j + '</sub> = <b>' + tidy(L.alpha) + '°</b>' }
+  ];
+
+  $('#moves').innerHTML = moves.map(mv =>
+    '<figure class="move">' +
+      '<figcaption><span class="mv-n">' + mv.n + '</span><span>' + mv.title + '</span></figcaption>' +
+      '<div class="matwrap">' + matHTML(mv.m, { mini: true }) + '</div>' +
+      '<p class="mv-cap">' + mv.cap + '</p>' +
+    '</figure>'
+  ).join('');
+
+  const varName = L.type === 'R' ? 'θ' : 'd';
+  $('#compose').innerHTML =
+    '<p class="eq eq-big">A<sub>' + j + '</sub> <span class="op">=</span> R<sub>z</sub>(θ<sub>' + j + '</sub>)' +
+      ' <span class="op">·</span> T<sub>z</sub>(d<sub>' + j + '</sub>)' +
+      ' <span class="op">·</span> T<sub>x</sub>(a<sub>' + j + '</sub>)' +
+      ' <span class="op">·</span> R<sub>x</sub>(α<sub>' + j + '</sub>)</p>' +
+    '<div class="compose-grid">' +
+      '<figure class="cs">' +
+        '<figcaption>Evaluated for joint ' + j + '</figcaption>' +
+        '<div class="matwrap">' + matHTML(A) + '</div>' +
+        '<p class="fine">θ<sub>' + j + '</sub> = ' + tidy(L.theta) + '° (' + fmt(L.theta * D2R, 3) +
+          ' rad) · d<sub>' + j + '</sub> = ' + tidy(L.d) + ' · a<sub>' + j + '</sub> = ' + tidy(L.a) +
+          ' · α<sub>' + j + '</sub> = ' + tidy(L.alpha) + '°</p>' +
+      '</figure>' +
+      '<figure class="cs">' +
+        '<figcaption>General form of the link matrix</figcaption>' +
+        '<div class="matwrap">' + matHTML(SYM, { sym: true }) + '</div>' +
+        '<p class="fine">with c<sub>θ</sub> = cos θ<sub>' + j + '</sub>, s<sub>θ</sub> = sin θ<sub>' + j +
+          '</sub>, and likewise for α. The variable here is <b>' + varName + '<sub>' + j + '</sub></b>.</p>' +
+      '</figure>' +
+    '</div>';
+}
+
+/* ============================================================
+   Chain + pose
+   ============================================================ */
+function renderChain(f) {
+  const n = state.n;
+  $('#chain').innerHTML = f.cums.map((T, i) => {
+    const eq = Array.from({ length: i + 1 }, (_, k) => 'A<sub>' + (k + 1) + '</sub>').join(' · ');
+    return '<article class="tcard' + (i === n - 1 ? ' is-final' : '') + '">' +
+      '<div class="tcard-head"><span class="tlabel">T<sub>' + (i + 1) + '</sub></span>' +
+        '<span class="teq">= ' + eq + '</span></div>' +
+      '<div class="matwrap">' + matHTML(T) + '</div>' +
+      '<div class="tcard-foot">origin in {0} · ' + fmt(T[0][3], 1) + ', ' + fmt(T[1][3], 1) + ', ' + fmt(T[2][3], 1) + '</div>' +
+    '</article>';
+  }).join('');
+
+  const T = f.T;
+  const nvec = [T[0][0], T[1][0], T[2][0]];
+  const svec = [T[0][1], T[1][1], T[2][1]];
+  const avec = [T[0][2], T[1][2], T[2][2]];
+  const pvec = [T[0][3], T[1][3], T[2][3]];
+  const singular = Math.abs(T[2][0]) > 0.99999;
+  const yaw = singular ? null : Math.atan2(T[1][0], T[0][0]) / D2R;
+  const pitch = Math.asin(clamp(-T[2][0], -1, 1)) / D2R;
+  const roll = singular ? null : Math.atan2(T[2][1], T[2][2]) / D2R;
+
+  const eq = Array.from({ length: n }, (_, k) => 'A<sub>' + (k + 1) + '</sub>').join(' · ');
+  const triple = v => v.map(x => (Math.abs(x) < 5e-4 ? '0.000' : x.toFixed(3))).join(', ');
+  const cell = (key, name, cls, v) =>
+    '<div class="pf-cell"><span class="vk ' + cls + '">' + key + '</span>' +
+      '<span class="vt">' + name + '</span>' +
+      '<span class="vv">' + triple(v) + '</span></div>';
+
+  $('#pose').innerHTML =
+    '<div class="pose-final">' +
+      '<div class="pf-kicker">Reading the last matrix · T<sub>' + n + '</sub> = ' + eq +
+        ' · its columns are the tool axes and origin</div>' +
+      '<div class="pf-grid">' +
+        cell('n', 'normal', 'n', nvec) +
+        cell('s', 'sliding', 's', svec) +
+        cell('a', 'approach', 'a', avec) +
+        cell('p', 'position', 'p', pvec) +
+      '</div>' +
+      '<p class="euler">Orientation, Z–Y–X: yaw <b>' + (yaw === null ? '—' : fmt(yaw, 1) + '°') +
+        '</b> · pitch <b>' + fmt(pitch, 1) + '°</b> · roll <b>' + (roll === null ? '—' : fmt(roll, 1) + '°') + '</b>' +
+        (singular ? ' · yaw and roll are not separable here (pitch is ±90°).' : '') + '</p>' +
+    '</div>';
+}
+
+/* ============================================================
+   Planar check
+   ============================================================ */
+function renderCheck(f) {
+  const planar = f.links.every(L => isZeroDeg(L.alpha));
+  if (!planar) {
+    $('#check').innerHTML =
+      '<div class="note-box"><p class="planar-copy">This chain leaves the plane — some α<sub>i</sub> ≠ 0 — so the elementary closed form below does not apply. The matrix product in § IV remains correct in every case; that is rather the point of it.</p>' +
+      '<p class="tiny">To see the check in action, load a planar chain: every link length lies in one plane and the position reduces to a sum of cosines and sines.</p>' +
+      '<button class="btn" type="button" data-action="planar"><span class="lamp"></span><span>Load the planar preset</span></button></div>';
+    return;
+  }
+
+  let acc = 0;
+  const rows = f.links.map((L, i) => {
+    acc += L.theta;
+    const x = L.a * Math.cos(acc * D2R);
+    const y = L.a * Math.sin(acc * D2R);
+    return { i, a: L.a, acc, x, y };
+  });
+  const x = rows.reduce((s, r) => s + r.x, 0);
+  const y = rows.reduce((s, r) => s + r.y, 0);
+  const z = f.links.reduce((s, L) => s + L.d, 0);
+  const T = f.T;
+  const err = Math.max(Math.abs(x - T[0][3]), Math.abs(y - T[1][3]), Math.abs(z - T[2][3]));
+
+  $('#check').innerHTML =
+    '<div class="check-grid">' +
+      '<div>' +
+        '<p class="planar-copy">With every α<sub>i</sub> = 0, the tool position is the sum of the link vectors, each rotated by all the joints before it:</p>' +
+        '<p class="formula">x = Σ a<sub>i</sub> cos(θ<sub>1</sub> + ⋯ + θ<sub>i</sub>)<br>' +
+          'y = Σ a<sub>i</sub> sin(θ<sub>1</sub> + ⋯ + θ<sub>i</sub>)<br>' +
+          'z = Σ d<sub>i</sub></p>' +
+        '<table class="chk">' +
+          '<thead><tr><th>i</th><th>a<sub>i</sub></th><th>θ<sub>1</sub>+⋯+θ<sub>i</sub></th><th>a<sub>i</sub> cos</th><th>a<sub>i</sub> sin</th></tr></thead><tbody>' +
+          rows.map(r => '<tr><td>' + (r.i + 1) + '</td><td>' + tidy(r.a) + '</td><td>' + fmt(r.acc, 1) + '°</td><td>' +
+            fmt(r.x, 2) + '</td><td>' + fmt(r.y, 2) + '</td></tr>').join('') +
+          '</tbody><tfoot><tr><td colspan="3" style="text-align:right">sum</td><td>' + fmt(x, 2) + '</td><td>' + fmt(y, 2) + '</td></tr></tfoot>' +
+        '</table>' +
+      '</div>' +
+      '<div>' +
+        '<div class="note-box">' +
+          '<p><b>Two roads to the same point.</b></p>' +
+          '<table class="cmp">' +
+            '<thead><tr><th></th><th>x</th><th>y</th><th>z</th></tr></thead>' +
+            '<tbody>' +
+              '<tr><td>by hand</td><td>' + fmt(x, 3) + '</td><td>' + fmt(y, 3) + '</td><td>' + fmt(z, 3) + '</td></tr>' +
+              '<tr><td>by matrix</td><td>' + fmt(T[0][3], 3) + '</td><td>' + fmt(T[1][3], 3) + '</td><td>' + fmt(T[2][3], 3) + '</td></tr>' +
+            '</tbody>' +
+          '</table>' +
+          '<p class="agree"><span class="ok">✓</span> The two agree to within ' + (err < 5e-4 ? '0.0005' : fmt(err, 4)) + '. That agreement is the whole argument for the matrix method: it does the trigonometry without being asked.</p>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+/* ============================================================
+   Stats
+   ============================================================ */
+function renderStats(f) {
+  const p = [f.T[0][3], f.T[1][3], f.T[2][3]];
+  const r = Math.hypot(p[0], p[1], p[2]);
+  const cell = (label, val) =>
+    '<div class="stat"><span class="sl">' + label + '</span><span class="sv">' + fmt(val, 2) + '</span></div>';
+  $('#stats').innerHTML =
+    cell('Tool x', p[0]) + cell('Tool y', p[1]) + cell('Tool z', p[2]) + cell('Reach', r);
+}
+
+/* ============================================================
+   One render pass
+   ============================================================ */
+function renderAll() {
+  const f = fk();
+  state.last = f;
+  renderPlate(f);
+  renderDerivation(f);
+  renderChain(f);
+  renderCheck(f);
+  renderStats(f);
+  syncTable(f);
+}
+
+function setTab(n) {
+  n = +n;
+  if (n === state.n) return;
+  stopAnim();
+  state.n = n;
+  state.selected = Math.min(state.selected, n - 1);
+  $$('.tab').forEach(t => t.setAttribute('aria-selected', String(+t.dataset.tab === n)));
+  $('#plate-panel').setAttribute('aria-labelledby', n === 2 ? 'tab-2' : 'tab-3');
+  renderPresets();
+  renderTable();
+  renderAll();
+}
+
+/* ============================================================
+   Animation
+   ============================================================ */
+function updateAnimBtn() {
+  const btn = $('#animBtn');
+  btn.classList.toggle('playing', state.anim.playing);
+  $('#animTxt').textContent = state.anim.playing ? 'Pause the motion' : 'Animate the joints';
+}
+function startAnim() {
+  if (state.anim.playing) return;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  const links = state.data[state.n];
+  state.anim.base = links.map(L => ({ theta: L.theta, d: L.d }));
+  state.anim.playing = true;
+  state.anim.t0 = performance.now();
+  state.anim.lastT = 0;
+  updateAnimBtn();
+  const tick = now => {
+    if (!state.anim.playing) return;
+    if (now - state.anim.lastT < 32) {
+      state.anim.raf = requestAnimationFrame(tick);
+      return;
+    }
+    state.anim.lastT = now;
+    const t = (now - state.anim.t0) / 1000;
+    links.forEach((L, i) => {
+      const ph = i * 2.1;
+      if (L.type === 'R') {
+        L.theta = state.anim.base[i].theta + 34 * Math.sin(t * 1.15 + ph);
+      } else {
+        L.d = Math.max(0, state.anim.base[i].d + 48 * Math.sin(t * 1.15 + ph));
+      }
+    });
+    renderAll();
+    state.anim.raf = requestAnimationFrame(tick);
+  };
+  state.anim.raf = requestAnimationFrame(tick);
+}
+function stopAnim() {
+  if (!state.anim.playing) return;
+  state.anim.playing = false;
+  cancelAnimationFrame(state.anim.raf);
+  state.anim.raf = 0;
+  updateAnimBtn();
+}
+
+/* ============================================================
+   Events
+   ============================================================ */
+$('#dhBody').addEventListener('click', e => {
+  const jp = e.target.closest('[data-jp]');
+  if (jp) {
+    const i = +jp.dataset.jp;
+    const L = state.data[state.n][i];
+    L.type = L.type === 'R' ? 'P' : 'R';
+    markDirty();
+    stopAnim();
+    state.selected = i;
+    renderTable();
+    renderAll();
+    return;
+  }
+  if (e.target.closest('input, button, label')) return;
+  const tr = e.target.closest('tr[data-row]');
+  if (tr) {
+    state.selected = +tr.dataset.row;
+    $$('#dhBody tr').forEach(r => r.classList.toggle('sel', +r.dataset.row === state.selected));
+    renderAll();
+  }
+});
+
+$('#dhBody').addEventListener('input', e => {
+  const inp = e.target;
+  if (!inp.matches('input[data-i]')) return;
+  const i = +inp.dataset.i, p = inp.dataset.p;
+  const L = state.data[state.n][i];
+  const val = parseFloat(inp.value);
+  if (!Number.isFinite(val)) return;
+  L[p] = val;
+  if (inp.type === 'range') {
+    const num = $('input.num[data-i="' + i + '"][data-p="' + p + '"]');
+    if (num) num.value = String(round1(val));
+  }
+  markDirty();
+  renderAll();
+});
+
+$('#dhBody').addEventListener('focusin', e => {
+  if (e.target.matches('input')) stopAnim();
+});
+
+$('#dhBody').addEventListener('change', e => {
+  const inp = e.target;
+  if (!inp.matches('input.num')) return;
+  const i = +inp.dataset.i, p = inp.dataset.p;
+  if (inp.value.trim() === '' || !Number.isFinite(parseFloat(inp.value))) {
+    inp.value = String(round1(state.data[state.n][i][p]));
+  }
+});
+
+document.addEventListener('click', e => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { setTab(tab.dataset.tab); return; }
+
+  const preset = e.target.closest('[data-preset]');
+  if (preset) { loadPreset(state.n, preset.dataset.preset); return; }
+
+  const joint = e.target.closest('[data-joint]');
+  if (joint) {
+    state.selected = +joint.dataset.joint;
+    stopAnim();
+    renderTable();
+    renderAll();
+    return;
+  }
+
+  const view = e.target.closest('[data-view]');
+  if (view) {
+    const v = view.dataset.view;
+    state.view = v === 'iso' ? { az: -0.72, el: 0.42 }
+               : v === 'elev' ? { az: -Math.PI / 2, el: 0.015 }
+               : { az: -Math.PI / 2, el: Math.PI / 2 - 0.002 };
+    $$('[data-view]').forEach(b => b.setAttribute('aria-pressed', String(b === view)));
+    if (state.last) renderPlate(state.last);
+    return;
+  }
+
+  const action = e.target.closest('[data-action]');
+  if (action && action.dataset.action === 'planar') {
+    loadPreset(state.n, 'planar');
+    return;
+  }
+});
+
+$('#restoreBtn').addEventListener('click', () => loadPreset(state.n, state.lastPreset[state.n]));
+$('#animBtn').addEventListener('click', () => state.anim.playing ? stopAnim() : startAnim());
+$('#togFrames').addEventListener('change', e => { state.showFrames = e.target.checked; if (state.last) renderPlate(state.last); });
+$('#togGrid').addEventListener('change', e => { state.showGrid = e.target.checked; if (state.last) renderPlate(state.last); });
+
+/* orbit */
+(function orbit() {
+  const svg = $('#plate');
+  let drag = null;
+  svg.addEventListener('pointerdown', e => {
+    drag = { x: e.clientX, y: e.clientY, az: state.view.az, el: state.view.el };
+    svg.setPointerCapture(e.pointerId);
+    svg.classList.add('grabbing');
+    stopAnim();
+  });
+  svg.addEventListener('pointermove', e => {
+    if (!drag) return;
+    state.view.az = drag.az - (e.clientX - drag.x) * 0.009;
+    state.view.el = clamp(drag.el + (e.clientY - drag.y) * 0.008, -0.12, 1.52);
+    if (state.last) renderPlate(state.last);
+  });
+  const end = () => { drag = null; svg.classList.remove('grabbing'); };
+  svg.addEventListener('pointerup', end);
+  svg.addEventListener('pointercancel', end);
+})();
+
+/* ============================================================
+   Boot
+   ============================================================ */
+renderPresets();
+renderTable();
+renderAll();
+updateAnimBtn();
+
+/* static illustration in § VI: block structure of a homogeneous matrix */
+$('#blockMatrix').innerHTML =
+  '<div class="mat"><span class="br l"></span><table>' +
+    '<tr><td style="color:#8c3a2b">R</td><td style="color:#8c3a2b">R</td><td style="color:#8c3a2b">R</td><td style="color:#a37a2c">p<sub>x</sub></td></tr>' +
+    '<tr><td style="color:#8c3a2b">R</td><td style="color:#8c3a2b">R</td><td style="color:#8c3a2b">R</td><td style="color:#a37a2c">p<sub>y</sub></td></tr>' +
+    '<tr><td style="color:#8c3a2b">R</td><td style="color:#8c3a2b">R</td><td style="color:#8c3a2b">R</td><td style="color:#a37a2c">p<sub>z</sub></td></tr>' +
+    '<tr><td class="z">0</td><td class="z">0</td><td class="z">0</td><td>1</td></tr>' +
+  '</table><span class="br r"></span></div>';
+</script>
+</body>
+</html>
